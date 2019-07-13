@@ -1,9 +1,8 @@
 # Open REALM: Real-time Aerial Localization and Mapping
 
-This is the repository for Open REALM, a real-time aerial mapping framework. It is currently in alpha state, so don't expect
-a polished and bugfree application. 
+This is the fork repository for Open REALM, a real-time aerial mapping framework. It is currently in alpha state, so don't expect a polished and bugfree application. 
 
-Feel free to fork and contribute. Let's make mapping fast again! :)
+I added a new comapping stage for collaborative aerial mapping tasks.
 
 ## Demonstration
 
@@ -14,7 +13,7 @@ Feel free to fork and contribute. Let's make mapping fast again! :)
 The proposed framework stands on the shoulders of giants, namely the open source implementation for
 visual SLAM and stereo reconstruction. Please read the references below. 
 
-For a detailed description of the underlying ideas refer to my thesis:
+For a detailed description of the underlying ideas refer to Alexander's thesis:
 
 https://drive.google.com/open?id=1zXxuCVN4wzlC-ZAZBz5qI4wLkv1b6CbH
 
@@ -142,6 +141,24 @@ node pkg="realm_ros" type="realm_exiv2_grabber" name="realm_exiv2_grabber" outpu
 Note: The exiv2 grabber node reads images and exiv2 tags from the provided folder and publishes them 
 for the mapping pipeline.
 
+If run collaborative mapping module， please set the path of data in comapping_noreco.launch first:
+```sh
+    <node pkg="realm_ros" type="realm_exiv2_grabber" name="realm_exiv2_grabber_0" output="screen">
+        <param name="config/id" type="string" value="$(arg camera_id_0)"/>
+        <param name="config/input" type="string" value="PUT THE TEST DATASET'S ABSOLUTE PATH OF AGENT 0 HERE "/>
+        <param name="config/rate" type="double" value="5"/>
+        <param name="config/profile" type="string" value="alexa_noreco"/> 
+    </node>
+```
+ ```sh
+ <node pkg="realm_ros" type="realm_exiv2_grabber" name="realm_exiv2_grabber_1" output="screen">
+        <param name="config/id" type="string" value="$(arg camera_id_1)"/>
+        <param name="config/input" type="string" value="PUT THE TEST DATASET'S ABSOLUTE PATH OF AGENT 1 HERE"/>
+        <param name="config/rate" type="double" value="5"/>
+        <param name="config/profile" type="string" value="alexa_noreco"/>
+
+    </node>
+ ```
 **Step 4:**
 Launch the pipeline you want to use.
 
@@ -159,7 +176,10 @@ roslaunch realm_ros alexa_noreco.launch
 ```sh
 roslaunch realm_ros alexa_reco.launch
 ```
-  
+- 2.5D collaborative mapping module of two drones
+```sh
+roslaunch realm_ros comapping_noreco.launch
+```
 ## References
 
 **Visual SLAM**
@@ -173,9 +193,13 @@ Robotics Best Paper Award).
 [2] Christian Häne, Lionel Heng, Gim Hee Lee, Alexey Sizov, Marc Pollefeys, Real-Time Direct Dense Matching on
 Fisheye Images Using Plane-Sweeping Stereo, Proc Int. Conf. on 3D Vison (3DV) 2014
 
+**Collaborative Mapping**
+
+[3] C. Forster, S. Lynen, L. Kneip, and D. Scaramuzza, “Collaborative monocular slam with multiple micro aerial vehicles,” in 2013 IEEE/RSJ Interna-tional Conference on Intelligent Robots and Systems, pp. 3962–3970, IEEE,2013.
+
 **Other**
 
-[3] P. Fankhauser and M. Hutter, "A Universal Grid Map Library: Implementation and Use Case for Rough Terrain Navigation",
+[4] P. Fankhauser and M. Hutter, "A Universal Grid Map Library: Implementation and Use Case for Rough Terrain Navigation",
 in Robot Operating System (ROS) – The Complete Reference (Volume 1), A. Koubaa (Ed.), Springer, 2016. 
 
-[4] T. Hinzmann, J. L. Schönberger, M. Pollefeys, and R. Siegwart, "Mapping on the Fly: Real-time 3D Dense Reconstruction, Digital Surface Map and Incremental Orthomosaic Generation for Unmanned Aerial Vehicles"
+[5] T. Hinzmann, J. L. Schönberger, M. Pollefeys, and R. Siegwart, "Mapping on the Fly: Real-time 3D Dense Reconstruction, Digital Surface Map and Incremental Orthomosaic Generation for Unmanned Aerial Vehicles"
