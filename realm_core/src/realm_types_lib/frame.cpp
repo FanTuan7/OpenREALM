@@ -45,7 +45,8 @@ Frame::Frame(const std::string &camera_id,
       _img_resize_factor(0.0),
       _min_scene_depth(0.0),
       _max_scene_depth(0.0),
-      _med_scene_depth(0.0)
+      _med_scene_depth(0.0),
+      _MapPoints({})
 {
   _cam.setPose(getDefaultPose());
 }
@@ -60,7 +61,8 @@ Frame::Frame(const Frame &f)
       _timestamp(f._timestamp),
       _img(f._img.clone()),
       _utm(f._utm),
-      _cam(f._cam)
+      _cam(f._cam),
+      _MapPoints(f._MapPoints)
 {
   if (f._has_accurate_pose)
     _M_c2w = f._M_c2w.clone();
@@ -352,6 +354,21 @@ void Frame::setImageResizeFactor(const double &value)
   _is_img_resizing_set = true;
 }
 
+void Frame::setMapPoints(std::vector<MapPoint> map_points)
+{
+    if (map_points.empty())
+    return;
+
+  _mutex_Map_Point.lock();
+  _MapPoints = map_points;
+  _mutex_Map_Point.unlock();
+
+}
+std::vector<MapPoint> Frame::getMapPoint() const
+{
+  return _MapPoints;
+}
+
 
 // FUNCTIONALITY
 
@@ -379,6 +396,17 @@ void Frame::applyGeoreference(const cv::Mat &T)
     }
     _mutex_surface_pts.unlock();
     computeSceneDepth();
+  }
+}
+
+void Frame::compute_GeoPos_of_MapPoint()
+{
+  for (int i=0;i<_MapPoints.size();i++)
+  {
+    _MapPoints[i]._mWorldPos.convertTo(_MapPoints[i]._mGeoPos, CV_64F);
+    _MapPoints[i]._mGeoPos.push_back(cv::Mat::ones(1, 1, CV_64F));
+    _MapPoints[i]._mGeoPos = _T_w2g * _MapPoints[i]._mGeoPos;
+    _MapPoints[i]._mGeoPos.pop_back();
   }
 }
 

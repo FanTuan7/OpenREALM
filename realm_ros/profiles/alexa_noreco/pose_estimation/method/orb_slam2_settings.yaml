@@ -3,7 +3,7 @@
 type: ORB_SLAM2
 
 # Resize factor for images, should always be <= 1.0
-resizing: 1.0
+resizing: 1
 
 # ORB Extractor: Number of features per image
 nrof_features: 3000

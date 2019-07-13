@@ -135,6 +135,34 @@ class MosaicingSettings : public StageSettings
     }
 };
 
+class ComappingSettings : public StageSettings
+{
+  public:
+    ComappingSettings()
+    {
+      add("th_elevation_min_nobs", Parameter_t<int>{0, "Threshold for minimum number of observations for elevation point"});
+      add("th_elevation_variance", Parameter_t<double>{0.0, "Threshold for elevation variance marking outlier"});
+      add("publish_mesh_every_nth_kf", Parameter_t<int>{0, "Activate global map publish every n keyframes as mesh"});
+      add("publish_mesh_at_finish", Parameter_t<int>{0, "Activate global map publish as mesh at finishCallback call"});
+      add("downsample_publish_mesh", Parameter_t<double>{0.0, "Downsample published mesh to lower GSD for performance. Unit: [m/pix]"});
+      add("save_valid", Parameter_t<int>{0, "Save valid global map grid elements"});
+      add("save_ortho_rgb_one", Parameter_t<int>{0, "Save global map ortho foto as one PNG image file"});
+      add("save_ortho_rgb_all", Parameter_t<int>{0, "Save global map ortho foto as incremental PNG image files"});
+      add("save_ortho_gtiff_one", Parameter_t<int>{0, "Save global map ortho foto as one GeoTIFF image file"});
+      add("save_ortho_gtiff_all", Parameter_t<int>{0, "Save global map ortho foto as incremental GeoTIFF image files"});
+      add("save_elevation_one", Parameter_t<int>{0, "Save global elevation map as one PNG image file"});
+      add("save_elevation_all", Parameter_t<int>{0, "Save global elevation map as incremental PNG image files"});
+      add("save_elevation_var_one", Parameter_t<int>{0, "Save global standard deviation map as one PNG image file"});
+      add("save_elevation_var_all", Parameter_t<int>{0, "Save global standard deviation map as incremental PNG image files"});
+      add("save_elevation_obs_angle_one", Parameter_t<int>{0, "Save global map elevation observation angles as one PNG image file"});
+      add("save_elevation_obs_angle_all", Parameter_t<int>{0, "Save global map elevation observation angles as incremental PNG image files"});
+      add("save_elevation_mesh_one", Parameter_t<int>{0, "Save global map elevation mesh as .ply file."});
+      add("save_num_obs_one", Parameter_t<int>{0, "Save global map number of observations per grid element as one PNG image file"});
+      add("save_num_obs_all", Parameter_t<int>{0, "Save global map number of observations per grid element as incremental PNG image files"});
+      add("save_dense_ply", Parameter_t<int>{0, "Save dense cloud as .ply file"});
+    }
+};
+
 } // namespace realm
 
 #endif //PROJECT_STAGE_SETTINGS_H

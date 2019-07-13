@@ -232,7 +232,7 @@ CvGridMap::Overlap CvGridMap::getOverlap(const CvGridMap &other_map) const
   if (other_map._roi.x + other_map._roi.width < _roi.x
       || other_map._roi.x > _roi.x + _roi.width
       || other_map._roi.y - other_map._roi.height > _roi.y
-      || other_map._roi.y < _roi.y - _roi.y - _roi.height)
+      || other_map._roi.y < _roi.y /*- _roi.y*/ - _roi.height)
     return Overlap{nullptr, nullptr};
 
   // Define copy area for layers by idx
@@ -248,7 +248,6 @@ CvGridMap::Overlap CvGridMap::getOverlap(const CvGridMap &other_map) const
     pt_ulc.y = _roi.y;
   if (other_map._roi.y-other_map._roi.height < _roi.y-_roi.height)
     pt_lrc.y = _roi.y-_roi.height;
-
   // create world frame roi
   cv::Rect2d roi_wf(pt_ulc.x, pt_ulc.y, pt_lrc.x-pt_ulc.x, pt_ulc.y-pt_lrc.y);
 
@@ -277,6 +276,7 @@ CvGridMap::Overlap CvGridMap::getOverlap(const CvGridMap &other_map) const
     cv::Mat overlap_data = layer.data(other_grid_roi).clone();
     map_added->add(layer.name, overlap_data, layer.interpolation);
   }
+
   return std::make_pair(map_ref, map_added);
 }
 
@@ -451,7 +451,10 @@ cv::Rect2d CvGridMap::roi() const
 {
   return _roi;
 }
-
+void CvGridMap::setroi(cv::Rect2d x)
+{
+  _roi = x;
+}
 void CvGridMap::printInfo() const
 {
   std::cout.precision(10);

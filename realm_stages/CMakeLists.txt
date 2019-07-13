@@ -29,6 +29,7 @@ add_library(${PROJECT_NAME} SHARED
         src/realm_stages_lib/surface_generation.cpp
         src/realm_stages_lib/ortho_rectification.cpp
         src/realm_stages_lib/mosaicing.cpp
+        src/realm_stages_lib/comapping.cpp
         )
 target_include_directories(${PROJECT_NAME} PUBLIC
         include

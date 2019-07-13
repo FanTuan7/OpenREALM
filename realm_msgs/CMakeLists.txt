@@ -10,6 +10,7 @@ add_message_files(
   GroundImageCompressed.msg
   Pinhole.msg
   CvGridMap.msg
+  MapPoint.msg
 )
 
 add_service_files(

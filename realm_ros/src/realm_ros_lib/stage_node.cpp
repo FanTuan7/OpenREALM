@@ -43,6 +43,8 @@ StageNode::StageNode(int argc, char **argv)
 
   // Set ros subscriber according to launch input
   _sub_input_frame = _nh.subscribe(_topic_frame_in, 5, &StageNode::subFrame, this, ros::TransportHints());
+  _sub_input_frame_1 = _nh.subscribe(_agent1_topic_frame_in, 5, &StageNode::subFrame, this, ros::TransportHints());
+  _sub_input_frame_2 = _nh.subscribe(_agent2_topic_frame_in, 5, &StageNode::subFrame, this, ros::TransportHints());
   if (_is_master_stage)
   {
     _publisher.insert({"general/output_dir", _nh.advertise<std_msgs::String>("/realm/" + _id_camera + "/general/output_dir", 5)});
@@ -69,6 +71,8 @@ StageNode::StageNode(int argc, char **argv)
     createStageOrthoRectification();
   if (_type_stage == "mosaicing")
     createStageMosaicing();
+  if (_type_stage == "comapping")
+    createStageComapping();
 
   // set stage path if master stage
   if (_is_master_stage)
@@ -185,6 +189,18 @@ void StageNode::createStageOrthoRectification()
 void StageNode::createStageMosaicing()
 {
   _stage = std::make_shared<stages::Mosaicing>(_settings_stage);
+  _publisher.insert({"output/rgb", _nh.advertise<sensor_msgs::Image>(_topic_prefix + "rgb", 5)});
+  _publisher.insert({"output/elevation", _nh.advertise<sensor_msgs::Image>(_topic_prefix + "elevation", 5)});
+  _publisher.insert({"output/pointcloud", _nh.advertise<sensor_msgs::PointCloud2>(_topic_prefix + "pointcloud", 5)});
+  _publisher.insert({"output/mesh", _nh.advertise<visualization_msgs::Marker>(_topic_prefix + "mesh", 5)});
+  _publisher.insert({"output/update/ortho", _nh.advertise<realm_msgs::GroundImageCompressed>(_topic_prefix + "update/ortho", 5)});
+  //_publisher.insert({"output/update/elevation", _nh.advertise<realm_msgs::GroundImageCompressed>(_topic_prefix + "update/elevation", 5)});
+  linkStageTransport();
+}
+
+void StageNode::createStageComapping()
+{
+  _stage = std::make_shared<stages::Comapping>(_settings_stage);
   _publisher.insert({"output/rgb", _nh.advertise<sensor_msgs::Image>(_topic_prefix + "rgb", 5)});
   _publisher.insert({"output/elevation", _nh.advertise<sensor_msgs::Image>(_topic_prefix + "elevation", 5)});
   _publisher.insert({"output/pointcloud", _nh.advertise<sensor_msgs::PointCloud2>(_topic_prefix + "pointcloud", 5)});
@@ -493,6 +509,8 @@ void StageNode::readParams()
   param_nh.param("stage/master", _is_master_stage, false);
   param_nh.param("stage/output_dir", _path_output, std::string("uninitialised"));
   param_nh.param("topics/input", _topic_frame_in, std::string("uninitialised"));
+  param_nh.param("topics/input1", _agent1_topic_frame_in, std::string("uninitialised"));
+  param_nh.param("topics/input2", _agent2_topic_frame_in, std::string("uninitialised"));
   param_nh.param("topics/output", _topic_frame_out, std::string("uninitialised"));
   param_nh.param("config/id", _id_camera, std::string("uninitialised"));
   param_nh.param("config/profile", _profile, std::string("uninitialised"));

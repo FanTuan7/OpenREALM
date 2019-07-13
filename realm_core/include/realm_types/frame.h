@@ -25,6 +25,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <vector>
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -33,6 +34,7 @@
 #include <realm_types/utm32.h>
 #include <realm_types/camera.h>
 #include <realm_types/cv_grid_map.h>
+#include <realm_types/map_point.h>
 
 namespace realm
 {
@@ -47,6 +49,8 @@ class Frame
   public:
     using Ptr = std::shared_ptr<Frame>;
     using ConstPtr = std::shared_ptr<const Frame>;
+
+
   public:
     /*!
      * @brief One and only constructor for the creation of a frame.
@@ -208,6 +212,8 @@ class Frame
      */
     cv::Mat getResizedImageUndistorted() const;
 
+
+    std::vector<MapPoint> getMapPoint() const;
     /*!
      * @brief Getter for the resized, distorted raw image
      * @return Resized, distorted raw image depending on the image resize factor set
@@ -288,6 +294,8 @@ class Frame
      */
     void setImageResizeFactor(const double &value);
 
+    void setMapPoints(std::vector<MapPoint> map_points); 
+
     /*!
      * @brief Function to print basic frame informations. Is usefull for debugging at certain points to check if the frame
      *        contains all the informations that it is expected to do.
@@ -302,6 +310,7 @@ class Frame
      */
     void applyGeoreference(const cv::Mat &T);
 
+    void compute_GeoPos_of_MapPoint();
     /*!
      * @brief Getter to check if this frame is marked as keyframe
      * @return true if yes
@@ -440,6 +449,11 @@ class Frame
 
     //! Mutex for transformation from world to geographic coordinate frame
     std::mutex _mutex_T_w2g;
+
+   
+
+    std::vector<MapPoint> _MapPoints;
+    std::mutex _mutex_Map_Point;
 
     /*!
      * @brief Private function to compute scene depth using the previously set surface points. Can obviously only be

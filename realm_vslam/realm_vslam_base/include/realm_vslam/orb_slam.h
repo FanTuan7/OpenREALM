@@ -29,7 +29,7 @@
 #include <realm_types/camera_settings.h>
 #include <realm_vslam/visual_slam_IF.h>
 #include <realm_vslam/visual_slam_settings.h>
-
+#include <realm_types/map_point.h>
 
 // CPU implementation
 #include <ORB_SLAM2/Settings.h>
@@ -49,6 +49,7 @@ class OrbSlam2 : public VisualSlamIF
 
     // Process
     VisualSlamIF::State Track(Frame::Ptr &frame) override;
+    void TransTrackedMapPoints(Frame::Ptr &frame);
     void Close() override;
     void Reset() override;
 

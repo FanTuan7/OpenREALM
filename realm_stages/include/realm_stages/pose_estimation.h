@@ -34,6 +34,8 @@
 #include <realm_vslam/geometric_referencer.h>
 #include <realm_vslam/visual_slam_factory.h>
 
+
+
 namespace realm
 {
 namespace stages

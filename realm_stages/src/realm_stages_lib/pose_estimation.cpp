@@ -19,7 +19,8 @@
 */
 
 #include <realm_stages/pose_estimation.h>
-
+//#define LOGURU_WITH_STREAMS 1
+//#include <loguru.hpp>
 using namespace realm;
 using namespace stages;
 
@@ -158,6 +159,7 @@ bool PoseEstimation::process()
       has_processed = true;
     }
   }
+
   return has_processed;
 }
 
@@ -173,21 +175,21 @@ void PoseEstimation::track(Frame::Ptr &frame)
   // Identify SLAM state
   switch (state)
   {
-    case VisualSlamIF::State::LOST:
-      if (estimatePercOverlap(frame) < _overlap_max_fallback)
-        pushToBufferPublish(frame);
-      LOG_F(WARNING, "No tracking.");
-      break;
-    case VisualSlamIF::State::INITIALIZED:
-      LOG_F(INFO, "Visual SLAM initialized.");
-      break;
-    case VisualSlamIF::State::FRAME_INSERT:
-      LOG_F(INFO, "Frame insertion.");
-      break;
-    case VisualSlamIF::State::KEYFRAME_INSERT:
-      frame->setKeyframe(true);
-      LOG_F(INFO, "Key frame insertion.");
-      break;
+  case VisualSlamIF::State::LOST:
+    if (estimatePercOverlap(frame) < _overlap_max_fallback)
+      pushToBufferPublish(frame);
+    LOG_F(WARNING, "No tracking.");
+    break;
+  case VisualSlamIF::State::INITIALIZED:
+    LOG_F(INFO, "Visual SLAM initialized.");
+    break;
+  case VisualSlamIF::State::FRAME_INSERT:
+    LOG_F(INFO, "Frame insertion.");
+    break;
+  case VisualSlamIF::State::KEYFRAME_INSERT:
+    frame->setKeyframe(true);
+    LOG_F(INFO, "Key frame insertion.");
+    break;
   }
   // Save tracked img with features in member
   std::unique_lock<std::mutex> lock(_mutex_img_debug);
@@ -200,7 +202,7 @@ void PoseEstimation::reset()
   std::unique_lock<std::mutex> lock1(_mutex_buffer_no_pose);
   std::unique_lock<std::mutex> lock2(_mutex_buffer_pose_init);
   std::unique_lock<std::mutex> lock3(_mutex_buffer_pose_all);
-  if (_reset_requested)  // User reset
+  if (_reset_requested) // User reset
   {
     LOG_F(INFO, "Reset has been requested!");
     // reset visual slam
@@ -208,7 +210,7 @@ void PoseEstimation::reset()
     _vslam->Reset();
     _mutex_vslam.unlock();
   }
-  else  // visual slam reset
+  else // visual slam reset
   {
     LOG_F(INFO, "Visual SLAM has triggered reset!");
     // In case of reset by vslam, publish all images in buffer with
@@ -233,7 +235,7 @@ void PoseEstimation::reset()
   _reset_requested = false;
 }
 
-bool PoseEstimation::changeParam(const std::string& name, const std::string &val)
+bool PoseEstimation::changeParam(const std::string &name, const std::string &val)
 {
   std::unique_lock<std::mutex> lock();
   if (name == "use_vslam")
@@ -344,10 +346,7 @@ double PoseEstimation::estimatePercOverlap(const Frame::Ptr &frame)
 {
   cv::Rect2d roi_curr = estimateProjectedRoi(frame);
 
-  if (roi_curr.x + roi_curr.width < _roi_prev.x
-      || roi_curr.x > _roi_prev.x + _roi_prev.width
-      || roi_curr.y - roi_curr.height > _roi_prev.y
-      || roi_curr.y < _roi_prev.y - _roi_prev.y - _roi_prev.height)
+  if (roi_curr.x + roi_curr.width < _roi_prev.x || roi_curr.x > _roi_prev.x + _roi_prev.width || roi_curr.y - roi_curr.height > _roi_prev.y || roi_curr.y < _roi_prev.y - _roi_prev.y - _roi_prev.height)
     return 0.0;
 
   // Assume full roi overlap
@@ -357,17 +356,17 @@ double PoseEstimation::estimatePercOverlap(const Frame::Ptr &frame)
   // Adjust the roi to the overlap
   if (roi_curr.x < _roi_prev.x)
     pt_ulc.x = _roi_prev.x;
-  if (roi_curr.x+roi_curr.width > _roi_prev.x+_roi_prev.width)
-    pt_lrc.x = _roi_prev.x+_roi_prev.width;
+  if (roi_curr.x + roi_curr.width > _roi_prev.x + _roi_prev.width)
+    pt_lrc.x = _roi_prev.x + _roi_prev.width;
   if (roi_curr.y > _roi_prev.y)
     pt_ulc.y = _roi_prev.y;
-  if (roi_curr.y-roi_curr.height < _roi_prev.y-_roi_prev.height)
-    pt_lrc.y = _roi_prev.y-_roi_prev.height;
+  if (roi_curr.y - roi_curr.height < _roi_prev.y - _roi_prev.height)
+    pt_lrc.y = _roi_prev.y - _roi_prev.height;
 
   // create world frame roi
-  cv::Rect2d roi_overlap(pt_ulc.x, pt_ulc.y, pt_lrc.x-pt_ulc.x, pt_ulc.y-pt_lrc.y);
+  cv::Rect2d roi_overlap(pt_ulc.x, pt_ulc.y, pt_lrc.x - pt_ulc.x, pt_ulc.y - pt_lrc.y);
 
-  return (roi_overlap.area() / roi_curr.area())*100;
+  return (roi_overlap.area() / roi_curr.area()) * 100;
 }
 
 cv::Rect2d PoseEstimation::estimateProjectedRoi(const Frame::Ptr &frame)
@@ -396,7 +395,7 @@ Frame::Ptr PoseEstimation::getNewFramePublish()
 void PoseEstimation::applyGeoreferenceToBuffer()
 {
   // Apply estimated geo reference to all measurements in the buffer
-  while(!_buffer_pose_all.empty())
+  while (!_buffer_pose_all.empty())
   {
     _mutex_buffer_pose_all.lock();
     Frame::Ptr frame = _buffer_pose_all.front();
@@ -425,10 +424,10 @@ void PoseEstimation::printGeoReferenceInfo(const Frame::Ptr &frame)
   LOG_F(INFO, "Georeferenced pose:");
   LOG_F(INFO, "GNSS: [%10.2f, %10.2f, %4.2f]", utm.easting, utm.northing, utm.altitude);
   LOG_F(INFO, "GNSS: [%10.2f, %10.2f, %4.2f]", t.at<double>(0), t.at<double>(1), t.at<double>(2));
-  LOG_F(INFO, "Diff: [%10.2f, %10.2f, %4.2f]", utm.easting-t.at<double>(0), utm.northing-t.at<double>(1), utm.altitude-t.at<double>(2));
+  LOG_F(INFO, "Diff: [%10.2f, %10.2f, %4.2f]", utm.easting - t.at<double>(0), utm.northing - t.at<double>(1), utm.altitude - t.at<double>(2));
 }
 
-PoseEstimationIO::PoseEstimationIO(PoseEstimation* stage, bool do_delay_keyframes)
+PoseEstimationIO::PoseEstimationIO(PoseEstimation *stage, bool do_delay_keyframes)
     : WorkerThreadBase("Publisher [pose_estimation]", true),
       _is_time_ref_set(false),
       _is_new_output_path_set(false),
@@ -465,15 +464,14 @@ bool PoseEstimationIO::process()
     // Grab frame from pose estimation geoereferenced mmts
     Frame::Ptr frame = _stage_handle->getNewFramePublish();
 
+
     // Data to be published for every georeferenced frame (usually small data packages).
     // Poses get only published, if suppress flag was not set (old poses might crash state estimate filter)
     if (!(_stage_handle->_do_suppress_outdated_pose_pub && _stage_handle->_buffer_do_publish.size() > 1))
       publishPose(frame);
 
     // Keyframes to be published (big data packages -> publish only if needed)
-    if ((_stage_handle->_use_fallback && !frame->hasAccuratePose() && _stage_handle->estimatePercOverlap(frame) < _stage_handle->_overlap_max_fallback)
-         ||(!_stage_handle->_use_vslam && _stage_handle->estimatePercOverlap(frame) < _stage_handle->_overlap_max_fallback)
-         || (frame->isKeyframe() && _stage_handle->estimatePercOverlap(frame) < _stage_handle->_overlap_max))
+    if ((_stage_handle->_use_fallback && !frame->hasAccuratePose() && _stage_handle->estimatePercOverlap(frame) < _stage_handle->_overlap_max_fallback) || (!_stage_handle->_use_vslam && _stage_handle->estimatePercOverlap(frame) < _stage_handle->_overlap_max_fallback) || (frame->isKeyframe() && _stage_handle->estimatePercOverlap(frame) < _stage_handle->_overlap_max))
     {
       _stage_handle->updatePreviousRoi(frame);
       if (_do_delay_keyframes)
@@ -548,13 +546,12 @@ void PoseEstimationIO::publishFrame(const Frame::Ptr &frame)
 
 void PoseEstimationIO::scheduleFrame(const Frame::Ptr &frame)
 {
-  long t_world = getCurrentTimeMilliseconds();       // millisec
-  uint64_t t_frame = frame->getTimestamp()/1000000;  // millisec
+  long t_world = getCurrentTimeMilliseconds();        // millisec
+  uint64_t t_frame = frame->getTimestamp() / 1000000; // millisec
 
   // Check if either first measurement ever (does not have to be keyframe)
   // Or if first keyframe
-  if ((frame->isKeyframe() && !_is_time_ref_set)
-      || (_t_ref.first == 0 && _t_ref.second == 0))
+  if ((frame->isKeyframe() && !_is_time_ref_set) || (_t_ref.first == 0 && _t_ref.second == 0))
   {
     _t_ref.first = t_world;
     _t_ref.second = t_frame;
@@ -568,8 +565,8 @@ void PoseEstimationIO::scheduleFrame(const Frame::Ptr &frame)
   _schedule.emplace_back(Task{(long)dt, frame});
 
   // Time until schedule
-  long t_remain = ((long)dt) - (getCurrentTimeMilliseconds()-_t_ref.first);
-  LOG_F(INFO, "Scheduled publish frame #%llu in %4.2fs", frame->getFrameId(), (double)t_remain/1000);
+  long t_remain = ((long)dt) - (getCurrentTimeMilliseconds() - _t_ref.first);
+  LOG_F(INFO, "Scheduled publish frame #%llu in %4.2fs", frame->getFrameId(), (double)t_remain / 1000);
 }
 
 void PoseEstimationIO::publishScheduled()
@@ -585,3 +582,4 @@ void PoseEstimationIO::publishScheduled()
     publishFrame(task.second);
   }
 }
+

@@ -27,7 +27,19 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "realm_stage_node");
 
   StageNode node(argc, argv);
+  ros::Rate rate(2);
+  if (node._type_stage == "pose_estimation")
+ros::Rate rate(2);
+  if (node._type_stage == "densification")
   ros::Rate rate(100);
+  if (node._type_stage == "surface_generation")
+  ros::Rate rate(100);
+  if (node._type_stage == "ortho_rectification")
+ ros::Rate rate(100);
+  if (node._type_stage == "mosaicing")
+ros::Rate rate(100);
+  if (node._type_stage == "comapping")
+ ros::Rate rate(100);
   while (node.isOkay())
   {
     ros::spinOnce();

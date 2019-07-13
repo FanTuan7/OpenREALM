@@ -28,10 +28,13 @@ add_library(${PROJECT_NAME} SHARED
         src/realm_types_lib/settings_base.cpp
         src/realm_types_lib/camera_settings_factory.cpp
         src/realm_types_lib/cv_grid_map.cpp
+        src/realm_types_lib/map_point.cpp
         src/realm_types_lib/worker_thread_base.cpp
         src/realm_maths_lib/sim2_solver.cpp
         src/realm_maths_lib/se3_solver.cpp
         src/realm_maths_lib/plane_fitter.cpp
+        src/realm_maths_lib/ransac.cpp
+        
         )
 target_include_directories(${PROJECT_NAME} PUBLIC
         include

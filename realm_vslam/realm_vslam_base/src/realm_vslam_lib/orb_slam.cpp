@@ -23,9 +23,9 @@
 using namespace realm;
 
 OrbSlam2::OrbSlam2(const VisualSlamSettings::Ptr &vslam_set, const CameraSettings::Ptr &cam_set)
-: _prev_keyid(-1),
-  _resizing(vslam_set->get<double>("resizing")),
-  _path_vocabulary(vslam_set->get<std::string>("path_vocabulary"))
+    : _prev_keyid(-1),
+      _resizing(vslam_set->get<double>("resizing")),
+      _path_vocabulary(vslam_set->get<std::string>("path_vocabulary"))
 {
   // Read the settings files
   cv::Mat K_32f = cv::Mat::eye(3, 3, CV_32F);
@@ -57,7 +57,7 @@ OrbSlam2::OrbSlam2(const VisualSlamSettings::Ptr &vslam_set, const CameraSetting
   _slam = new ORB_SLAM2::System(_cam_set, _track_set, _view_set, _path_vocabulary, ORB_SLAM2::System::MONOCULAR, false);
 
   namespace ph = std::placeholders;
-  std::function<void(ORB_SLAM2::KeyFrame*)> kf_update = std::bind(&OrbSlam2::keyframeUpdateCb, this, ph::_1);
+  std::function<void(ORB_SLAM2::KeyFrame *)> kf_update = std::bind(&OrbSlam2::keyframeUpdateCb, this, ph::_1);
   _slam->RegisterKeyTransport(kf_update);
 }
 
@@ -91,7 +91,7 @@ VisualSlamIF::State OrbSlam2::Track(Frame::Ptr &frame)
 
     cv::Mat surface_pts = GetTrackedMapPoints();
     frame->setSurfacePoints(surface_pts);
-
+    TransTrackedMapPoints(frame);
     // Check if new frame is keyframe by comparing current keyid with last keyid
     int32_t keyid = (int32_t)_slam->GetLastKeyFrameId();
 
@@ -125,6 +125,36 @@ void OrbSlam2::Close()
   _slam->Shutdown();
 }
 
+void OrbSlam2::TransTrackedMapPoints(Frame::Ptr &frame)
+{
+  vector<ORB_SLAM2::MapPoint *> ORB_MP;
+  std::vector<cv::KeyPoint> mvKeys;
+
+  ORB_MP = _slam->GetTrackedMapPoints();
+  mvKeys = _slam->GetTrackedKeyPointsUn();
+  size_t n = ORB_MP.size();
+
+  std::vector<MapPoint> MPs{};
+
+  for (size_t i = 0; i < n; ++i)
+  {
+
+    if (ORB_MP[i] != nullptr)
+    {
+      cv::Mat p = ORB_MP[i]->GetWorldPos();
+      cv::Mat d = ORB_MP[i]->GetDescriptor();
+      double x = mvKeys[i].pt.x;
+      double y = mvKeys[i].pt.y;
+      MPs.push_back( MapPoint(p,d,x,y) );
+    }
+  }
+
+  if(MPs.size() > 0)
+  {
+    frame->setMapPoints(MPs);
+  }
+}
+
 cv::Mat OrbSlam2::GetTrackedMapPoints() const
 {
   vector<ORB_SLAM2::MapPoint *> mappoints;
@@ -149,7 +179,6 @@ cv::Mat OrbSlam2::GetTrackedMapPoints() const
 
 cv::Mat OrbSlam2::GetMapPoints() const
 {
-
 }
 
 bool OrbSlam2::DrawTrackedImage(cv::Mat &img) const
@@ -171,11 +200,11 @@ void OrbSlam2::RegisterResetCallback(const VisualSlamIF::ResetFuncCb &func)
   }
 }
 
-void OrbSlam2::keyframeUpdateCb(ORB_SLAM2::KeyFrame* kf)
+void OrbSlam2::keyframeUpdateCb(ORB_SLAM2::KeyFrame *kf)
 {
   if (kf != nullptr && _pose_update_func_cb)
   {
-    auto id = (uint32_t) kf->mnFrameId;
+    auto id = (uint32_t)kf->mnFrameId;
 
     // Get update on pose
     cv::Mat T_w2c = kf->GetPose();
@@ -184,7 +213,7 @@ void OrbSlam2::keyframeUpdateCb(ORB_SLAM2::KeyFrame* kf)
     T_c2w.pop_back();
 
     // Get update on map points
-    std::set<ORB_SLAM2::MapPoint*> map_points = kf->GetMapPoints();
+    std::set<ORB_SLAM2::MapPoint *> map_points = kf->GetMapPoints();
     cv::Mat points;
     points.reserve(map_points.size());
     for (const auto &pt : map_points)
@@ -201,7 +230,7 @@ cv::Mat OrbSlam2::invertPose(const cv::Mat &pose) const
 {
   cv::Mat pose_inv = cv::Mat::eye(4, 4, pose.type());
   cv::Mat R_t = (pose.rowRange(0, 3).colRange(0, 3)).t();
-  cv::Mat t = -R_t*pose.rowRange(0, 3).col(3);
+  cv::Mat t = -R_t * pose.rowRange(0, 3).col(3);
   R_t.copyTo(pose_inv.rowRange(0, 3).colRange(0, 3));
   t.copyTo(pose_inv.rowRange(0, 3).col(3));
   return pose_inv;

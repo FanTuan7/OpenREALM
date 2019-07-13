@@ -42,6 +42,8 @@ StageSettings::Ptr StageSettingsFactory::load(const std::string &stage_type_set,
     return loadDefault<OrthoRectificationSettings>(settings, stage_type_set, filepath);
   if (stage_type_set == "mosaicing")
     return loadDefault<MosaicingSettings>(settings, stage_type_set, filepath);
+      if (stage_type_set == "comapping")
+    return loadDefault<ComappingSettings>(settings, stage_type_set, filepath);
 }
 
 template <typename T>

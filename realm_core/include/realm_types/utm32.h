@@ -37,6 +37,7 @@
 
 #include <memory>
 #include <limits>
+#include <iostream>
 
 namespace realm
 {
@@ -47,102 +48,122 @@ namespace realm
 
 class UTMPose
 {
-    // Type definitions
-  public:
-    using Ptr = std::shared_ptr<UTMPose>;
-    using ConstPtr = std::shared_ptr<const UTMPose>;
+  // Type definitions
+public:
+  using Ptr = std::shared_ptr<UTMPose>;
+  using ConstPtr = std::shared_ptr<const UTMPose>;
 
-    // Class definition
-  public:
+  // Class definition
+public:
+  /** Null constructor. Makes a 2D, invalid point object. */
+  UTMPose()
+      : easting(0.0),
+        northing(0.0),
+        altitude(std::numeric_limits<double>::quiet_NaN()),
+        heading(std::numeric_limits<double>::quiet_NaN()),
+        zone(0),
+        band(' ')
+  {
+  }
 
-    /** Null constructor. Makes a 2D, invalid point object. */
-    UTMPose()
-        : easting(0.0),
-          northing(0.0),
-          altitude(std::numeric_limits<double>::quiet_NaN()),
-          heading(std::numeric_limits<double>::quiet_NaN()),
-          zone(0),
-          band(' ')
-    {
-    }
+  /** Copy constructor. */
+  UTMPose(const UTMPose &that)
+      : easting(that.easting),
+        northing(that.northing),
+        altitude(that.altitude),
+        heading(that.heading),
+        zone(that.zone),
+        band(that.band)
+  {
+  }
 
-    /** Copy constructor. */
-    UTMPose(const UTMPose &that)
-        : easting(that.easting),
-          northing(that.northing),
-          altitude(that.altitude),
-          heading(that.heading),
-          zone(that.zone),
-          band(that.band)
-    {
-    }
+  /** Create a flattened 2-D grid point. */
+  UTMPose(double _easting,
+          double _northing,
+          double _heading,
+          uint8_t _zone,
+          char _band)
+      : easting(_easting),
+        northing(_northing),
+        altitude(std::numeric_limits<double>::quiet_NaN()),
+        heading(_heading),
+        zone(_zone),
+        band(_band)
+  {
+  }
 
-    /** Create a flattened 2-D grid point. */
-    UTMPose(double _easting,
-             double _northing,
-             double _heading,
-             uint8_t _zone,
-             char _band)
-        : easting(_easting),
-          northing(_northing),
-          altitude(std::numeric_limits<double>::quiet_NaN()),
-          heading(_heading),
-          zone(_zone),
-          band(_band)
-    {
-    }
+  /** Create a 3-D grid point. */
+  UTMPose(double _easting,
+          double _northing,
+          double _altitude,
+          double _heading,
+          uint8_t _zone,
+          char _band)
+      : easting(_easting), northing(_northing), altitude(_altitude), heading(_heading), zone(_zone), band(_band)
+  {
+  }
 
-    /** Create a 3-D grid point. */
-    UTMPose(double _easting,
-             double _northing,
-             double _altitude,
-             double _heading,
-             uint8_t _zone,
-             char _band)
-        : easting(_easting), northing(_northing), altitude(_altitude), heading(_heading), zone(_zone), band(_band)
-    {
-    }
-
-    // data members
-    double easting;           ///< easting within grid zone [meters]
-    double northing;          ///< northing within grid zone [meters]
-    double altitude;          ///< altitude above ellipsoid [meters] or NaN
-    double heading;
-    uint8_t zone;             ///< UTM longitude zone number
-    char band;              ///< MGRS latitude band letter
+  // data members
+  double easting;  ///< easting within grid zone [meters]
+  double northing; ///< northing within grid zone [meters]
+  double altitude; ///< altitude above ellipsoid [meters] or NaN
+  double heading;
+  uint8_t zone; ///< UTM longitude zone number
+  char band;    ///< MGRS latitude band letter
 
 }; // class UTMPoint
 
 static char UTMBand(double Lat, double Lon)
 {
-    char LetterDesignator;
+  char LetterDesignator;
 
-    if     ((84 >= Lat) && (Lat >= 72))  LetterDesignator = 'X';
-    else if ((72 > Lat) && (Lat >= 64))  LetterDesignator = 'W';
-    else if ((64 > Lat) && (Lat >= 56))  LetterDesignator = 'V';
-    else if ((56 > Lat) && (Lat >= 48))  LetterDesignator = 'U';
-    else if ((48 > Lat) && (Lat >= 40))  LetterDesignator = 'T';
-    else if ((40 > Lat) && (Lat >= 32))  LetterDesignator = 'S';
-    else if ((32 > Lat) && (Lat >= 24))  LetterDesignator = 'R';
-    else if ((24 > Lat) && (Lat >= 16))  LetterDesignator = 'Q';
-    else if ((16 > Lat) && (Lat >= 8))   LetterDesignator = 'P';
-    else if (( 8 > Lat) && (Lat >= 0))   LetterDesignator = 'N';
-    else if (( 0 > Lat) && (Lat >= -8))  LetterDesignator = 'M';
-    else if ((-8 > Lat) && (Lat >= -16)) LetterDesignator = 'L';
-    else if((-16 > Lat) && (Lat >= -24)) LetterDesignator = 'K';
-    else if((-24 > Lat) && (Lat >= -32)) LetterDesignator = 'J';
-    else if((-32 > Lat) && (Lat >= -40)) LetterDesignator = 'H';
-    else if((-40 > Lat) && (Lat >= -48)) LetterDesignator = 'G';
-    else if((-48 > Lat) && (Lat >= -56)) LetterDesignator = 'F';
-    else if((-56 > Lat) && (Lat >= -64)) LetterDesignator = 'E';
-    else if((-64 > Lat) && (Lat >= -72)) LetterDesignator = 'D';
-    else if((-72 > Lat) && (Lat >= -80)) LetterDesignator = 'C';
-        // '_' is an error flag, the Latitude is outside the UTM limits
-    else LetterDesignator = ' ';
+  if ((84 >= Lat) && (Lat >= 72))
+    LetterDesignator = 'X';
+  else if ((72 > Lat) && (Lat >= 64))
+    LetterDesignator = 'W';
+  else if ((64 > Lat) && (Lat >= 56))
+    LetterDesignator = 'V';
+  else if ((56 > Lat) && (Lat >= 48))
+    LetterDesignator = 'U';
+  else if ((48 > Lat) && (Lat >= 40))
+    LetterDesignator = 'T';
+  else if ((40 > Lat) && (Lat >= 32))
+    LetterDesignator = 'S';
+  else if ((32 > Lat) && (Lat >= 24))
+    LetterDesignator = 'R';
+  else if ((24 > Lat) && (Lat >= 16))
+    LetterDesignator = 'Q';
+  else if ((16 > Lat) && (Lat >= 8))
+    LetterDesignator = 'P';
+  else if ((8 > Lat) && (Lat >= 0))
+    LetterDesignator = 'N';
+  else if ((0 > Lat) && (Lat >= -8))
+    LetterDesignator = 'M';
+  else if ((-8 > Lat) && (Lat >= -16))
+    LetterDesignator = 'L';
+  else if ((-16 > Lat) && (Lat >= -24))
+    LetterDesignator = 'K';
+  else if ((-24 > Lat) && (Lat >= -32))
+    LetterDesignator = 'J';
+  else if ((-32 > Lat) && (Lat >= -40))
+    LetterDesignator = 'H';
+  else if ((-40 > Lat) && (Lat >= -48))
+    LetterDesignator = 'G';
+  else if ((-48 > Lat) && (Lat >= -56))
+    LetterDesignator = 'F';
+  else if ((-56 > Lat) && (Lat >= -64))
+    LetterDesignator = 'E';
+  else if ((-64 > Lat) && (Lat >= -72))
+    LetterDesignator = 'D';
+  else if ((-72 > Lat) && (Lat >= -80))
+    LetterDesignator = 'C';
+  // '_' is an error flag, the Latitude is outside the UTM limits
+  else
+    LetterDesignator = ' ';
 
-    return LetterDesignator;
+  return LetterDesignator;
 }
 
-}
+} // namespace realm
 
 #endif //PROJECT_UTM32_H

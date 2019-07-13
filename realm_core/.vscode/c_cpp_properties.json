@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/tzh/catkin_ws/devel/include",
+                "/opt/ros/kinetic/include",
+                "/home/tzh/catkin_ws/src/OpenREALM/realm_vslam/realm_vslam_impl/orb_slam_2/include",
+                "/home/tzh/catkin_ws/src/OpenREALM/realm_core/include",
+                "/home/tzh/catkin_ws/src/OpenREALM/realm_densifier/realm_densifier_base/include",
+                "/home/tzh/catkin_ws/src/OpenREALM/realm_io/include",
+                "/home/tzh/catkin_ws/src/OpenREALM/realm_ortho/include",
+                "/home/tzh/catkin_ws/src/OpenREALM/realm_ros/include",
+                "/home/tzh/catkin_ws/src/OpenREALM/realm_stages/include",
+                "/home/tzh/catkin_ws/src/OpenREALM/realm_vslam/realm_vslam_base/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

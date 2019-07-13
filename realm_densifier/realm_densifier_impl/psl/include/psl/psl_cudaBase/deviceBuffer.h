@@ -19,7 +19,8 @@
 #define DEVICEBUFFER_H
 
 #include "cudaCommon.h"
-#include "cuda_runtime.h"
+//#include "cuda_runtime.h"
+#include "/usr/local/cuda-10.1/targets/x86_64-linux/include/cuda_runtime.h"
 #include <string>
 
 

@@ -39,6 +39,7 @@
 #include <realm_types/structs.h>
 #include <realm_types/camera.h>
 #include <realm_types/cv_grid_map.h>
+#include <realm_types/map_point.h>
 #include <realm_cv/analysis.h>
 
 #include <std_msgs/Float32.h>
@@ -53,6 +54,7 @@
 #include <realm_msgs/CvGridMap.h>
 #include <realm_msgs/Georeference.h>
 #include <realm_msgs/GroundImageCompressed.h>
+#include <realm_msgs/MapPoint.h>
 
 namespace realm
 {
@@ -231,6 +233,8 @@ visualization_msgs::Marker meshMarker(const std_msgs::Header &header,
                                       int32_t action,
                                       const tf::Transform &T);
 
+
+realm_msgs::MapPoint mapPoint(const std_msgs::Header &header, const realm::MapPoint &mp);
 } // namespace to_ros
 
 namespace to_realm
@@ -317,6 +321,8 @@ cv::Mat imageCompressed(const sensor_msgs::CompressedImage &msg);
  * @return REALM CvGridMap
  */
 realm::CvGridMap::Ptr cvGridMap(const realm_msgs::CvGridMap &msg);
+
+realm::MapPoint mapPoint(const realm_msgs::MapPoint &msg);
 
 } // namespace to_realm
 } // namespace realm

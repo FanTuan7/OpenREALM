@@ -52,6 +52,7 @@ Densification::Densification(const StageSettings::Ptr &stage_set,
 
 void Densification::addFrame(const Frame::Ptr &frame)
 {
+
   // Check if frame and settings are fulfilled to process/densify incoming frames
   // if not, redirect to next stage
   if (   !frame->isKeyframe()
@@ -66,6 +67,7 @@ void Densification::addFrame(const Frame::Ptr &frame)
 
     LOG_F(INFO, "Frame #%llu not suited for dense reconstruction. Passing through...", frame->getFrameId());
     _transport_frame(frame, "output/frame");
+
     return;
   }
 

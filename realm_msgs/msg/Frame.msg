@@ -42,6 +42,7 @@ geometry_msgs/Pose visual_pose
 # (optional) Transformation from the visual to the geographic world
 realm_msgs/Georeference georeference
 
+realm_msgs/MapPoint[] map_points
 ######################## Flags ########################
 # Reset flag: set true, if following stage should be resetted
 std_msgs/Bool do_reset
@@ -57,3 +58,5 @@ std_msgs/Bool is_georeferenced
 
 # Flag to check if surface was computed with 2.5D elevation or not
 std_msgs/Bool is_surface_elevated
+
+

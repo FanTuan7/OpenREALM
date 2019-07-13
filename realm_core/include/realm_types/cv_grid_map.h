@@ -34,6 +34,8 @@
 #include <realm_types/enums.h>
 #include <realm_cv/mat_overwrite.h>
 
+#include <realm_common/loguru.hpp>
+
 namespace realm
 {
 
@@ -273,7 +275,7 @@ class CvGridMap
      * @return roi of the grid
      */
     cv::Rect2d roi() const;
-
+    void setroi(cv::Rect2d x);
     /*!
      * @brief Prints debug information of the grid map, e.g. size of the data, layers, roi in the world frame
      */

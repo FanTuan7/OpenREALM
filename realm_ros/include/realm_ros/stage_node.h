@@ -41,6 +41,7 @@
 #include <realm_stages/surface_generation.h>
 #include <realm_stages/ortho_rectification.h>
 #include <realm_stages/mosaicing.h>
+#include <realm_stages/comapping.h>
 
 #include <std_msgs/String.h>
 #include <sensor_msgs/Image.h>
@@ -56,6 +57,8 @@
 #include <std_srvs/Trigger.h>
 #include <realm_msgs/ParameterChange.h>
 
+#include <list>
+
 namespace realm
 {
 
@@ -66,6 +69,7 @@ class StageNode
     ~StageNode();
     void spin();
     bool isOkay();
+    std::string _type_stage;
   private:
     // Master stage has several privileges,
     // e.g. creating output folder, ...
@@ -79,7 +83,7 @@ class StageNode
     uint32_t _nrof_msgs_rcvd;
 
     // type of stage
-    std::string _type_stage;
+    //std::string _type_stage;
     std::string _type_method;
 
     // camera info
@@ -90,6 +94,8 @@ class StageNode
 
     // ros communication handles
     ros::Subscriber _sub_input_frame;
+    ros::Subscriber _sub_input_frame_1;
+    ros::Subscriber _sub_input_frame_2;
     ros::Subscriber _sub_output_dir;
     std::unordered_map<std::string, ros::Publisher> _publisher;
 
@@ -122,6 +128,8 @@ class StageNode
     // topics
     std::string _topic_prefix;
     std::string _topic_frame_in;
+    std::string _agent1_topic_frame_in;
+    std::string _agent2_topic_frame_in;
     std::string _topic_frame_out;
 
     // transforms
@@ -152,6 +160,7 @@ class StageNode
     void createStageSurfaceGeneration();
     void createStageOrthoRectification();
     void createStageMosaicing();
+    void createStageComapping();
     void linkStageTransport();
 
     // Functionalities
